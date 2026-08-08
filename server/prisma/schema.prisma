@@ -7,10 +7,154 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Minimal placeholder model to ensure Prisma client compiles successfully
-model SystemLog {
-  id        Int      @id @default(autoincrement())
-  event     String
-  message   String
-  timestamp DateTime @default(now())
+// ==========================================
+// Enums
+// ==========================================
+
+enum Role {
+  ADMIN
+  SALES
+  WAREHOUSE
+  ACCOUNTS
+}
+
+enum CustomerType {
+  RETAIL
+  WHOLESALE
+  DISTRIBUTOR
+}
+
+enum CustomerStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+}
+
+enum MovementType {
+  IN
+  OUT
+}
+
+enum ChallanStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+// ==========================================
+// Models
+// ==========================================
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  followUps      CustomerFollowUp[]
+  stockMovements StockMovement[]
+  salesChallans  SalesChallan[]
+}
+
+model Customer {
+  id           String         @id @default(uuid())
+  name         String
+  mobile       String
+  email        String
+  businessName String
+  gstNumber    String?        @db.VarChar(15)
+  customerType CustomerType
+  address      String
+  status       CustomerStatus
+  followUpDate DateTime?
+  notes        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  // Relationships
+  followUps     CustomerFollowUp[]
+  salesChallans SalesChallan[]
+
+  // Indexes for commonly searched/filterable fields
+  @@index([name])
+  @@index([email])
+  @@index([businessName])
+  @@index([status])
+  @@index([customerType])
+}
+
+model CustomerFollowUp {
+  id           String   @id @default(uuid())
+  customerId   String
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  note         String
+  followUpDate DateTime
+  createdBy    String
+  creator      User     @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  createdAt    DateTime @default(now())
+}
+
+model Product {
+  id                String   @id @default(uuid())
+  name              String
+  sku               String   @unique
+  category          String
+  unitPrice         Decimal  @db.Decimal(10, 2)
+  currentStock      Int
+  minimumStock      Int
+  warehouseLocation String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  stockMovements    StockMovement[]
+  salesChallanItems SalesChallanItem[]
+
+  // Indexes for commonly searched/filterable fields
+  @@index([category])
+  @@index([warehouseLocation])
+}
+
+model StockMovement {
+  id              String       @id @default(uuid())
+  productId       String
+  product         Product      @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantityChanged Int
+  movementType    MovementType
+  reason          String
+  createdBy       String
+  creator         User         @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  createdAt       DateTime     @default(now())
+}
+
+model SalesChallan {
+  id            String        @id @default(uuid())
+  challanNumber String        @unique
+  customerId    String
+  customer      Customer      @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  totalQuantity Int
+  status        ChallanStatus
+  createdBy     String
+  creator       User          @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relationships
+  items SalesChallanItem[]
+}
+
+model SalesChallanItem {
+  id                  String       @id @default(uuid())
+  challanId           String
+  challan             SalesChallan @relation(fields: [challanId], references: [id], onDelete: Cascade)
+  productId           String
+  product             Product      @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productNameSnapshot String
+  skuSnapshot         String
+  unitPriceSnapshot   Decimal      @db.Decimal(10, 2)
+  quantity            Int
 }
