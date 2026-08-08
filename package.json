@@ -1,0 +1,20 @@
+{
+  "name": "mini-erp-crm",
+  "version": "1.0.0",
+  "description": "Mini ERP + CRM Operations Portal",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm install && npm install --prefix client --legacy-peer-deps && npm install --prefix server --legacy-peer-deps",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "dev": "concurrently -n \"client,server\" -c \"cyan,green\" \"npm run dev:client\" \"npm run dev:server\"",
+    "build:client": "npm run build --prefix client",
+    "build:server": "npm run build --prefix server",
+    "build": "npm run build:client && npm run build:server",
+    "prisma:generate": "npm run prisma:generate --prefix server",
+    "prisma:migrate": "npm run prisma:migrate --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

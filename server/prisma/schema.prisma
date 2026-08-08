@@ -1,0 +1,16 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Minimal placeholder model to ensure Prisma client compiles successfully
+model SystemLog {
+  id        Int      @id @default(autoincrement())
+  event     String
+  message   String
+  timestamp DateTime @default(now())
+}
