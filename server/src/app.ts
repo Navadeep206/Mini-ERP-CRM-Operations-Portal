@@ -47,6 +47,15 @@ const loginRateLimiter = rateLimit({
 
 app.use('/api/auth/login', loginRateLimiter);
 
+// Root route for cloud deployment health check compatibility
+app.get('/', (_req: Request, res: Response) => {
+  res.status(200).json({
+    success: true,
+    message: 'Nexus ERP API Server is running',
+    environment: config.env,
+  });
+});
+
 // API Routes
 app.use('/api', apiRouter);
 
