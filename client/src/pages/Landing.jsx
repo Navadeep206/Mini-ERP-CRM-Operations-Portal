@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import ThreeScene from '../components/ThreeScene';
+import logo from '../assets/logo.png';
 
 export default function Landing() {
   const { isAuthenticated } = useAuth();
@@ -101,7 +102,8 @@ export default function Landing() {
           padding: '0 24px'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img src={logo} alt="Nexus Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
           <span 
             style={{ 
               fontWeight: 800, 
@@ -111,7 +113,7 @@ export default function Landing() {
               WebkitTextFillColor: 'transparent'
             }}
           >
-            MINI ERP
+            NEXUS ERP
           </span>
         </div>
 
@@ -312,7 +314,7 @@ export default function Landing() {
           <div style={{ textAlign: 'center', marginBottom: '64px' }}>
             <h2 style={{ fontSize: '2.25rem', fontWeight: 800, marginBottom: '12px' }}>From customer request to confirmed sale.</h2>
             <p style={{ color: 'var(--text-secondary)', maxWidth: '580px', margin: '0 auto' }}>
-              Understand the transactional data flows executing inside the Mini ERP portal.
+              Understand the transactional data flows executing inside the Nexus ERP portal.
             </p>
           </div>
 
@@ -484,9 +486,12 @@ export default function Landing() {
         }}
       >
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '24px' }}>
-          <div>
-            <div style={{ fontWeight: 800, color: '#fff', fontSize: '1rem', marginBottom: '6px' }}>MINI ERP</div>
-            <div>Mini ERP + CRM Operations Portal.</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <img src={logo} alt="Nexus Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+            <div>
+              <div style={{ fontWeight: 800, color: '#fff', fontSize: '1rem', marginBottom: '2px' }}>NEXUS ERP</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Nexus ERP + CRM Operations Portal.</div>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '24px' }}>
             <button onClick={() => scrollToSection('features')} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 'inherit' }}>Features</button>

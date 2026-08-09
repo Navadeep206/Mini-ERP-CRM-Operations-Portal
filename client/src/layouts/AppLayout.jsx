@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
+import logo from '../assets/logo.png';
 import { 
   LayoutDashboard, 
   Users, 
@@ -48,7 +49,7 @@ export default function AppLayout() {
     if (path.startsWith('/products')) return 'Product Catalog';
     if (path.startsWith('/inventory')) return 'Inventory Stocks Control';
     if (path.startsWith('/challans')) return 'Sales Delivery Challans';
-    return 'Mini ERP Portal';
+    return 'Nexus ERP Portal';
   };
 
   return (
@@ -80,8 +81,14 @@ export default function AppLayout() {
         }}
       >
         <div className="sidebar-brand">
-          <Link to="/dashboard" className="sidebar-logo" style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>MINI ERP + CRM</span>
+          <Link to="/dashboard" className="sidebar-logo" style={{ display: 'flex', width: '100%', gap: '10px', alignItems: 'center', background: 'none', WebkitBackgroundClip: 'unset', WebkitTextFillColor: 'unset' }}>
+            <img src={logo} alt="Nexus Logo" style={{ width: '28px', height: '28px', flexShrink: 0, objectFit: 'contain' }} />
+            <span style={{ 
+              background: 'linear-gradient(135deg, #a78bfa 0%, #06b6d4 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 700 
+            }}>NEXUS ERP</span>
           </Link>
           {isMobileNavOpen && (
             <button 

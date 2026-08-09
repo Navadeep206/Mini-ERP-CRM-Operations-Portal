@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Lock, Mail, LogIn, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import logo from '../assets/logo.png';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -41,9 +42,17 @@ export default function Login() {
   return (
     <div className="login-container">
       <div className="glass-card login-card">
-        <div className="login-header">
-          <div className="login-logo">MINI ERP + CRM</div>
-          <p className="login-subtitle">Administrative Operations Portal</p>
+        <div className="login-header" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div className="login-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: 'none', WebkitBackgroundClip: 'unset', WebkitTextFillColor: 'unset' }}>
+            <img src={logo} alt="Nexus ERP Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+            <span style={{ 
+              background: 'linear-gradient(135deg, #a78bfa 0%, #06b6d4 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 800
+            }}>NEXUS ERP</span>
+          </div>
+          <p className="login-subtitle" style={{ marginTop: '8px' }}>Administrative Operations Portal</p>
         </div>
 
         {errorMsg && (
