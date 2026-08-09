@@ -11,8 +11,10 @@
     "build:client": "npm run build --prefix client",
     "build:server": "npm run build --prefix server",
     "build": "npm run build:client && npm run build:server",
+    "build:server:prod": "npm install --prefix server --legacy-peer-deps && npm run prisma:generate && npm run build:server",
     "prisma:generate": "npm run prisma:generate --prefix server",
-    "prisma:migrate": "npm run prisma:migrate --prefix server"
+    "prisma:migrate": "npm run prisma:migrate --prefix server",
+    "start": "node server/dist/server.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
