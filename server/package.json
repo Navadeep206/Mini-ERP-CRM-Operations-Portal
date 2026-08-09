@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
-    "build:server:prod": "prisma generate && tsc",
+    "build:server:prod": "npm install --include=dev && npx prisma generate && npx tsc",
     "start": "node dist/server.js",
     "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
     "prisma:generate": "prisma generate",
