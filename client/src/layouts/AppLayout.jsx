@@ -131,19 +131,19 @@ export default function AppLayout() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <button 
               onClick={() => setIsMobileNavOpen(true)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4 }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', alignItems: 'center', padding: 4 }}
               className="mobile-toggle"
               aria-label="Open menu"
             >
               <Menu size={20} style={{ color: 'var(--text-secondary)' }} />
             </button>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.2 }}>
                 <span>Operations</span>
                 <ChevronRight size={10} />
                 <span>{getPageTitle()}</span>
               </div>
-              <h1 className="navbar-title" style={{ marginTop: '2px' }}>{getPageTitle()}</h1>
+              <h1 className="navbar-title" style={{ lineHeight: 1.2 }}>{getPageTitle()}</h1>
             </div>
           </div>
 

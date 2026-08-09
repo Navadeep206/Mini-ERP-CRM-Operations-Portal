@@ -172,7 +172,7 @@ export default function ProductForm() {
                 className="form-input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Industrial Gearbox X10"
+                placeholder="Enter product name"
                 disabled={isSaving}
                 aria-required="true"
               />
@@ -188,7 +188,7 @@ export default function ProductForm() {
                 className="form-input"
                 value={sku}
                 onChange={(e) => setSku(e.target.value.toUpperCase())}
-                placeholder="SKU-100-GEAR"
+                placeholder="Enter SKU code"
                 disabled={isSaving}
                 aria-required="true"
               />

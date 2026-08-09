@@ -201,7 +201,7 @@ export default function CustomerForm() {
                 className="form-input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
+                placeholder="Enter customer name"
                 disabled={isSaving}
                 aria-required="true"
               />
@@ -217,7 +217,7 @@ export default function CustomerForm() {
                 className="form-input"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
-                placeholder="+1 555-0199"
+                placeholder="Enter mobile number"
                 disabled={isSaving}
                 aria-required="true"
               />
@@ -233,7 +233,7 @@ export default function CustomerForm() {
                 className="form-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="john.doe@email.com"
+                placeholder="Enter email address"
                 disabled={isSaving}
                 aria-required="true"
               />
@@ -254,7 +254,7 @@ export default function CustomerForm() {
                 className="form-input"
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="Acme Global Inc."
+                placeholder="Enter business name"
                 disabled={isSaving}
                 aria-required="true"
               />
@@ -270,7 +270,7 @@ export default function CustomerForm() {
                 className="form-input"
                 value={gstNumber}
                 onChange={(e) => setGstNumber(e.target.value.toUpperCase())}
-                placeholder="15-character GSTIN"
+                placeholder="Enter GST number"
                 disabled={isSaving}
               />
               {fieldErrors.gstNumber && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '4px' }}>{fieldErrors.gstNumber}</span>}
@@ -308,7 +308,7 @@ export default function CustomerForm() {
               className="form-input"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="Full street location details..."
+              placeholder="Enter billing & delivery address"
               style={{ minHeight: '80px', resize: 'vertical' }}
               disabled={isSaving}
               aria-required="true"
@@ -355,7 +355,7 @@ export default function CustomerForm() {
               className="form-input"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Pre-sales interactions, scheduling logs, specific customer requirements..."
+              placeholder="Enter operational notes"
               style={{ minHeight: '80px', resize: 'vertical' }}
               disabled={isSaving}
             />

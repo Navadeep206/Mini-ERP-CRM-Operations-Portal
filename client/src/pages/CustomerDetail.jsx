@@ -275,7 +275,7 @@ export default function CustomerDetail() {
                     className="form-input"
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                    placeholder="Discussed pricing adjustments, pending wholesale orders..."
+                    placeholder="Enter interaction notes"
                     style={{ minHeight: '80px', resize: 'vertical' }}
                     disabled={isSubmitting}
                     required

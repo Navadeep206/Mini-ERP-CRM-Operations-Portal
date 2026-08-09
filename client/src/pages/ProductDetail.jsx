@@ -312,7 +312,7 @@ export default function ProductDetail() {
                     id="reason"
                     type="text"
                     className="form-input"
-                    placeholder={adjustType === 'IN' ? 'Supplier shipment, Customer return...' : 'Damaged stock, Sales challan correction...'}
+                    placeholder="Enter adjustment reason"
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     required

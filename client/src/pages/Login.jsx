@@ -76,7 +76,7 @@ export default function Login() {
                 type="email"
                 required
                 className="form-input"
-                placeholder="operator@company.com"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 style={{ paddingLeft: '48px', width: '100%' }}
@@ -95,7 +95,7 @@ export default function Login() {
                 type={showPassword ? 'text' : 'password'}
                 required
                 className="form-input"
-                placeholder="••••••••"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 style={{ paddingLeft: '48px', paddingRight: '48px', width: '100%' }}
