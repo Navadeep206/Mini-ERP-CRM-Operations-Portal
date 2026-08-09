@@ -1,6 +1,7 @@
 import { tokenStorage } from './auth';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+let API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+API_URL = API_URL.replace(/\/api\/?$/, '').replace(/\/$/, '');
 
 export const requestHelper = async (endpoint, method = 'GET', body = null) => {
   const token = tokenStorage.get();
