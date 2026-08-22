@@ -61,7 +61,7 @@ export default function DemandForecast() {
         
         // Load details and forecast in parallel
         const [prod, forecastResult] = await Promise.all([
-          productService.getProductById(selectedProductId),
+          productService.getProduct(selectedProductId),
           productService.getProductForecast(selectedProductId, horizon)
         ]);
 

@@ -52,4 +52,12 @@ export const productService = {
   getProductForecast: async (id, horizon = 4) => {
     return requestHelper(`/api/forecast/${id}?horizon=${horizon}`);
   },
+
+  getBulkRisk: async (horizon = 4) => {
+    return requestHelper(`/api/inventory/intelligence?horizon=${horizon}`);
+  },
+
+  getProductRisk: async (id, horizon = 4) => {
+    return requestHelper(`/api/inventory/intelligence/${id}?horizon=${horizon}`);
+  },
 };
