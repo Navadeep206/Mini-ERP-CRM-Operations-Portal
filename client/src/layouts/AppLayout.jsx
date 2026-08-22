@@ -12,7 +12,9 @@ import {
   X,
   ChevronRight,
   UploadCloud,
-  Bot
+  Bot,
+  TrendingUp,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -39,6 +41,8 @@ export default function AppLayout() {
     { to: '/inventory', label: 'Inventory Stocks', icon: ShoppingCart, roles: ['ADMIN', 'WAREHOUSE', 'ACCOUNTS'] },
     { to: '/challans', label: 'Delivery Challans', icon: FileSpreadsheet, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] },
     { to: '/import', label: 'AI Bulk Import', icon: UploadCloud, roles: ['ADMIN', 'WAREHOUSE'] },
+    { to: '/demand-forecast', label: 'Demand Forecast', icon: TrendingUp, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] },
+    { to: '/inventory-intelligence', label: 'Inventory Risk', icon: ShieldAlert, roles: ['ADMIN', 'WAREHOUSE', 'ACCOUNTS'] },
     { to: '/ai-assistant', label: 'AI Assistant', icon: Bot, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] }
   ];
 
@@ -54,7 +58,9 @@ export default function AppLayout() {
     if (path.startsWith('/inventory')) return 'Inventory Stocks Control';
     if (path.startsWith('/challans')) return 'Sales Delivery Challans';
     if (path.startsWith('/import')) return 'AI Bulk Import Pipeline';
-    if (path.startsWith('/ai-assistant')) return 'AI Assistant';
+    if (path.startsWith('/demand-forecast')) return 'Demand Forecasting';
+    if (path.startsWith('/inventory-intelligence')) return 'Inventory Risk Intelligence';
+    if (path.startsWith('/ai-assistant')) return 'AI Operations Assistant';
     return 'Nexus ERP Portal';
   };
 

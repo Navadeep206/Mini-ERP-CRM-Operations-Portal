@@ -13,14 +13,17 @@ import {
   UserCheck,
   ClipboardList,
   RefreshCw,
-  Clock
+  Clock,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { dashboardService } from '../services/dashboard';
+import { productService } from '../services/product';
 
 export default function Dashboard() {
   const { user, role } = useAuth();
   const [data, setData] = useState(null);
+  const [riskData, setRiskData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -28,8 +31,15 @@ export default function Dashboard() {
     try {
       setLoading(true);
       setError(null);
-      const summary = await dashboardService.getDashboardSummary();
+      const [summary, riskSummary] = await Promise.all([
+        dashboardService.getDashboardSummary(),
+        productService.getBulkRisk(4).catch(err => {
+          console.warn('Could not fetch bulk intelligence metrics, using offline fallback empty list:', err.message);
+          return { results: [] };
+        })
+      ]);
       setData(summary);
+      setRiskData(riskSummary?.results || []);
     } catch (err) {
       console.error('Failed to load dashboard metrics:', err);
       setError(err.message || 'An error occurred while loading dashboard statistics.');
@@ -175,6 +185,69 @@ export default function Dashboard() {
         })}
       </div>
 
+      {/* AI Inventory Health Widget Row */}
+      {['ADMIN', 'WAREHOUSE', 'ACCOUNTS'].includes(role) && riskData.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+            <Sparkles size={18} style={{ color: 'var(--accent-cyan)' }} />
+            <span>AI Inventory Risk Intelligence Overview</span>
+          </h3>
+          <div className="dashboard-grid" style={{ marginTop: 0 }}>
+            <div className="glass-card stat-widget" style={{ borderColor: 'rgba(239, 68, 68, 0.25)' }}>
+              <div className="stat-icon-wrapper" style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', color: 'var(--danger)' }}>
+                <AlertTriangle size={24} />
+              </div>
+              <div className="stat-info">
+                <span className="stat-label">Critical Stockout Risks</span>
+                <span className="stat-value" style={{ color: 'var(--danger)' }}>
+                  {riskData.filter(r => r.riskLevel === 'CRITICAL').length}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Depletion expected in &lt;2w</span>
+              </div>
+            </div>
+
+            <div className="glass-card stat-widget" style={{ borderColor: 'rgba(245, 158, 11, 0.25)' }}>
+              <div className="stat-icon-wrapper" style={{ backgroundColor: 'rgba(245, 158, 11, 0.15)', color: 'var(--warning)' }}>
+                <AlertTriangle size={24} />
+              </div>
+              <div className="stat-info">
+                <span className="stat-label">High Depletion Risks</span>
+                <span className="stat-value" style={{ color: 'var(--warning)' }}>
+                  {riskData.filter(r => r.riskLevel === 'HIGH').length}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Safety buffer breaches in &lt;2w</span>
+              </div>
+            </div>
+
+            <div className="glass-card stat-widget" style={{ borderColor: 'rgba(6, 182, 212, 0.25)' }}>
+              <div className="stat-icon-wrapper" style={{ backgroundColor: 'rgba(6, 182, 212, 0.15)', color: 'var(--accent-cyan)' }}>
+                <ShoppingCart size={24} />
+              </div>
+              <div className="stat-info">
+                <span className="stat-label">Medium Stock Breaches</span>
+                <span className="stat-value" style={{ color: 'var(--accent-cyan)' }}>
+                  {riskData.filter(r => r.riskLevel === 'MEDIUM').length}
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Safety breaches expected in &lt;4w</span>
+              </div>
+            </div>
+
+            <div className="glass-card stat-widget" style={{ borderColor: 'rgba(16, 185, 129, 0.25)' }}>
+              <div className="stat-icon-wrapper" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', color: 'var(--success)' }}>
+                <RefreshCw size={24} />
+              </div>
+              <div className="stat-info">
+                <span className="stat-label">Total Suggested Reorder</span>
+                <span className="stat-value" style={{ color: 'var(--success)' }}>
+                  {riskData.reduce((sum, r) => sum + r.recommendedReorderQuantity, 0)} units
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Required for forecast safety</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Detailed Activity Lists */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '32px' }}>
         
@@ -303,6 +376,50 @@ export default function Dashboard() {
         {/* Right Column Widgets */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           
+          {/* AI Reorder Suggestions Insights (ADMIN, WAREHOUSE, ACCOUNTS only) */}
+          {['ADMIN', 'WAREHOUSE', 'ACCOUNTS'].includes(role) && riskData.length > 0 && (
+            <div className="glass-card" style={{ borderColor: 'rgba(6, 182, 212, 0.25)', background: 'linear-gradient(135deg, rgba(6,182,212,0.02) 0%, rgba(255,255,255,0.01) 100%)' }}>
+              <div className="panel-header">
+                <h3 className="panel-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-cyan)' }}>
+                  <Sparkles size={18} />
+                  <span>AI Reorder Suggestions</span>
+                </h3>
+                <Link to="/inventory-intelligence" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--accent-cyan)', fontWeight: 500 }}>
+                  Risk Panel <ArrowRight size={14} />
+                </Link>
+              </div>
+
+              {riskData.filter(r => r.recommendedReorderQuantity > 0).length === 0 ? (
+                <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--success)' }}>
+                  All systems green. No reorders needed.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {riskData
+                    .filter(r => r.recommendedReorderQuantity > 0)
+                    .slice(0, 3)
+                    .map((r, idx) => (
+                      <div key={idx} style={{ padding: '12px', backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: '8px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <Link to={`/products/${r.productId}`} style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                            {r.productName}
+                          </Link>
+                          <span className={`badge badge-${r.riskLevel === 'CRITICAL' ? 'danger' : r.riskLevel === 'HIGH' ? 'warning' : 'info'}`} style={{ fontSize: '0.65rem' }}>
+                            {r.riskLevel}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>{r.explanation}</p>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.02)', fontSize: '0.75rem' }}>
+                          <span style={{ color: 'var(--text-muted)' }}>Current stock: <strong>{r.currentStock}</strong></span>
+                          <span style={{ color: 'var(--success)', fontWeight: 600 }}>Suggested: +{r.recommendedReorderQuantity}</span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Low Stock Product safety list (ADMIN, WAREHOUSE, ACCOUNTS only) */}
           {['ADMIN', 'WAREHOUSE', 'ACCOUNTS'].includes(role) && (
             <div className="glass-card">

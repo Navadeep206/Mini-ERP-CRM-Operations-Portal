@@ -254,62 +254,127 @@ erDiagram
 
 ---
 
+## 🧠 AI/ML Features & Pipelines
+
+### 1. AI Bulk Excel Imports (Phase 2)
+*   **Pipeline Flow**: Excel Upload ──> File Validation ──> Header Schema Mapping ──> Validation / Cleaning ──> Duplicate Detection ──> DB Ingestion.
+*   **Header Mapping**: Automates mapping of spreadsheet columns to catalog schemas, allowing manual overrides.
+*   **Duplicate Detection**: Compares incoming rows against database keys (emails, SKUs) and offers resolution alerts.
+
+### 2. Demand Forecasting Microservice (Phase 3)
+*   **Stack**: Python, FastAPI, Pandas, Scikit-Learn, XGBoost, Joblib.
+*   **Aggregation**: Resamples sales transaction logs on Monday-based weekly boundaries (`W-MON`), filling empty periods with `0.0`.
+*   **Evaluation & Selection**: Splits history (75% train, 25% validation), comparing Mean Absolute Error (MAE) and RMSE of XGBoost against a baseline. Serializes the best-performing model as a `.joblib` binary.
+*   **Node.js High-Availability Fallback**: If the FastAPI microservice is unreachable, the Express backend automatically falls back to a locally computed 4-week Moving Average forecast, ensuring zero-downtime.
+
+### 3. Inventory Risk Intelligence (Phase 4)
+*   **Risk Metrics Evaluation**: Correlates active stocks with weekly demand predictions to project stockouts.
+*   **Risk Classification Levels**:
+    *   `CRITICAL`: Projected inventory drops below or equal to 0 within 2 weeks.
+    *   `HIGH`: Projected stock drops below safety margins within 2 weeks or stockout within 4 weeks.
+    *   `MEDIUM`: Projected stock drops below safety margins in weeks 3-4.
+    *   `LOW`: Stable stock levels remaining above safety buffers.
+*   **Reorder Suggestions**: Calculates reorder sizes: $\max(0, CumulativeDemand + SafetyStock - CurrentInventory)$.
+
+### 4. RAG AI Assistant (Phase 4)
+*   **Query Router**: Inspects queries to choose the best data source:
+    *   *Structured counts/stats* -> relational database metrics.
+    *   *Fuzzy catalog matches* -> local memory TF-IDF Vector Database.
+    *   *Stockouts/depletion* -> ML forecasting and inventory risk models.
+*   **Response Generation**: Gathers context into a structured markdown block:
+    *   *Online Mode*: Calls the Google Gemini REST API (specifically `gemini-1.5-flash`) when `GEMINI_API_KEY` is configured.
+    *   *Offline Mode*: Falls back to the custom local NLG engine.
+
+---
+
+## 📐 System Architecture
+
+```text
+                    [ REACT CLIENT (Vite) ]
+                               │
+                               ▼
+                    [ NODE / EXPRESS SERVER ]
+                               │
+       ┌───────────────────────┼───────────────────────┐
+       ▼                       ▼                       ▼
+[ DATABASE (PostgreSQL) ]  [ ML MICROSERVICE ]  [ AI SERVICE (LLM) ]
+ - Users / Catalog          - Python FastAPI     - Gemini REST API
+ - Sales Challans           - XGBoost Forecasts  - Local NLG Fallback
+ - Audit Movements          - joblib Binaries    - TF-IDF Vector DB
+```
+
+---
+
 ## 💻 Local Workspace Setup
 
 ### Prerequisites
-- **Node.js**: v18.0.0 or higher
-- **Package Manager**: npm v9.0.0 or higher
-- **Database**: A local or remote PostgreSQL instance
+*   **Node.js**: v18.0.0 or higher
+*   **Python**: v3.12 (specifically recommended for scikit-learn/xgboost wheels compatibility)
+*   **Database**: PostgreSQL instance
 
 ### Setup Steps
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/Navadeep206/Mini-ERP-CRM-Operations-Portal.git
-   cd Mini-ERP-CRM-Operations-Portal
-   ```
 
-2. **Install Workspace Dependencies**:
-   ```bash
-   npm run install:all
-   ```
-   *This command recursively installs all node dependencies inside root, `/client`, and `/server` folders using the legacy peer-dependency flag.*
+1.  **Clone the Repository**:
+    ```bash
+    git clone https://github.com/Navadeep206/Mini-ERP-CRM-Operations-Portal.git
+    cd Mini-ERP-CRM-Operations-Portal
+    ```
 
-3. **Configure Environment Variables**:
-   * Create a `server/.env` file:
-     ```env
-     PORT=5001
-     NODE_ENV=development
-     DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME?schema=public"
-     JWT_SECRET="your-super-secret-jwt-key"
-     JWT_EXPIRES_IN="1d"
-     CLIENT_URL="http://localhost:5173"
-     ```
-   * Create a `client/.env` file:
-     ```env
-     VITE_API_URL="http://localhost:5001"
-     ```
+2.  **Install Node Dependencies**:
+    ```bash
+    npm run install:all
+    ```
 
-4. **Sync database and generate client**:
-   * Navigate to `/server` and sync tables:
-     ```bash
-     cd server
-     npx prisma db push
-     npx prisma db seed
-     ```
+3.  **Install Python ML Dependencies**:
+    ```bash
+    cd ml-service
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    ```
 
-5. **Start Dev Servers**:
-   * Return to the root folder and run:
-     ```bash
-     npm run dev
-     ```
-   * This boots up:
-     * Frontend: `http://localhost:5173`
-     * Backend: `http://localhost:5001`
+4.  **Configure Environment Variables**:
+    *   Create a `/server/.env` file:
+        ```env
+        PORT=5001
+        NODE_ENV=development
+        DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME?schema=public"
+        JWT_SECRET="your-super-secret-jwt-key"
+        JWT_EXPIRES_IN="1d"
+        CLIENT_URL="http://localhost:5173"
+        ML_SERVICE_URL="http://127.0.0.1:8000"
+        GEMINI_API_KEY="your-google-gemini-api-key-if-applicable"
+        ```
+    *   Create a `/client/.env` file:
+        ```env
+        VITE_API_URL="http://localhost:5001"
+        ```
+
+5.  **Sync database**:
+    ```bash
+    cd ../server
+    npx prisma db push
+    npx prisma db seed
+    ```
+
+6.  **Run Dev Servers**:
+    *   Start Python microservice (port 8000):
+        ```bash
+        cd ../ml-service
+        source venv/bin/activate
+        uvicorn main:app --host 127.0.0.1 --port 8000
+        ```
+    *   Start Node and React dev servers (root folder):
+        ```bash
+        cd ..
+        npm run dev
+        ```
 
 ---
 
 ## ⚠️ Known Limitations & Assumptions
-- **GST Validation**: GST is stored as a string and validated for basic format length and regex constraints, but is not verified against external tax databases.
-- **Multi-currency**: Currently handles unit prices as a fixed-scale decimal value assuming a single currency representation.
-- **Stock replenishment**: There are no automate Purchase Order (PO) triggers; stock replenishment is handled through manual stock adjustment inputs by users with `WAREHOUSE` access.
-- **Single-Location Inventory**: Assumes simple single-location warehouse bins for products, lacking multi-location transfer flows.
+*   **GST Validation**: GST is stored as a string and validated for format length and regex constraints, but is not verified against external tax registries.
+*   **Single-Location Inventory**: Assumes simple single-location warehouse bins for products, lacking multi-location transfer routing.
+*   **Vector DB Portability**: Uses a memory-based TF-IDF search index, which rebuilds on boot or on catalog synchronization updates.
+*   **Model Training Frequency**: The demand forecast model is trained offline when triggered by admins; online requests are served from the pre-serialized XGBoost or moving average fallback loops.
+

@@ -29,6 +29,8 @@ import Forbidden from './pages/Forbidden';
 import NotFound from './pages/NotFound';
 import ImportPortal from './pages/ImportPortal';
 import AiAssistant from './pages/AiAssistant';
+import DemandForecast from './pages/DemandForecast';
+import InventoryIntelligence from './pages/InventoryIntelligence';
 
 export default function App() {
   return (
@@ -153,6 +155,26 @@ export default function App() {
                     element={
                       <RequireRole allowedRoles={['ADMIN', 'WAREHOUSE', 'SALES', 'ACCOUNTS']}>
                         <AiAssistant />
+                      </RequireRole>
+                    } 
+                  />
+
+                  {/* AI Demand Forecasting - ADMIN, WAREHOUSE, SALES, ACCOUNTS */}
+                  <Route 
+                    path="/demand-forecast" 
+                    element={
+                      <RequireRole allowedRoles={['ADMIN', 'WAREHOUSE', 'SALES', 'ACCOUNTS']}>
+                        <DemandForecast />
+                      </RequireRole>
+                    } 
+                  />
+
+                  {/* AI Inventory Risk Intelligence - ADMIN, WAREHOUSE, ACCOUNTS */}
+                  <Route 
+                    path="/inventory-intelligence" 
+                    element={
+                      <RequireRole allowedRoles={['ADMIN', 'WAREHOUSE', 'ACCOUNTS']}>
+                        <InventoryIntelligence />
                       </RequireRole>
                     } 
                   />
