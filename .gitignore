@@ -88,6 +88,13 @@ Thumbs.db
 *.db
 *.db-journal
 
-# Prisma
 /server/prisma/dev.db
 /server/prisma/dev.db-journal
+
+# Python / Machine Learning Service
+ml-service/venv/
+ml-service/__pycache__/
+ml-service/models/
+ml-service/.pytest_cache/
+.ipynb_checkpoints/
+*.pyc

@@ -48,4 +48,8 @@ export const productService = {
     if (params.limit) query.append('limit', params.limit);
     return requestHelper(`/api/inventory/low-stock?${query.toString()}`);
   },
+
+  getProductForecast: async (id, horizon = 4) => {
+    return requestHelper(`/api/forecast/${id}?horizon=${horizon}`);
+  },
 };

@@ -16,6 +16,13 @@ export default function ProductDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Forecasting States
+  const [forecastData, setForecastData] = useState([]);
+  const [historyData, setHistoryData] = useState([]);
+  const [forecastStatus, setForecastStatus] = useState('LOADING');
+  const [forecastModel, setForecastModel] = useState('');
+  const [forecastHorizon, setForecastHorizon] = useState(4);
+
   // Stock Adjustment Form States
   const [adjustType, setAdjustType] = useState('IN'); // 'IN' or 'OUT'
   const [quantity, setQuantity] = useState(1);
@@ -48,9 +55,30 @@ export default function ProductDetail() {
     }
   }, [id, currentPage]);
 
+  const loadForecast = useCallback(async () => {
+    setForecastStatus('LOADING');
+    try {
+      const res = await productService.getProductForecast(id, forecastHorizon);
+      if (res.status === 'INSUFFICIENT_HISTORY') {
+        setForecastStatus('INSUFFICIENT_HISTORY');
+        setForecastData([]);
+        setHistoryData([]);
+      } else {
+        setForecastData(res.forecast || []);
+        setHistoryData(res.history || []);
+        setForecastModel(res.model_type || 'Moving Average');
+        setForecastStatus('FORECASTED');
+      }
+    } catch (err) {
+      console.error('Error fetching forecast:', err);
+      setForecastStatus('ERROR');
+    }
+  }, [id, forecastHorizon]);
+
   useEffect(() => {
     loadProductData();
-  }, [loadProductData]);
+    loadForecast();
+  }, [loadProductData, loadForecast]);
 
   const handleAdjustSubmit = (e) => {
     e.preventDefault();
@@ -403,6 +431,224 @@ export default function ProductDetail() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* 3. Demand Forecasting Dashboard Section */}
+      <div className="glass-card" style={{ marginTop: '32px', padding: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-glass)', paddingBottom: '16px', marginBottom: '20px' }}>
+          <div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FileSpreadsheet size={20} />
+              <span>AI Product Demand Forecasting</span>
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '2px' }}>
+              Time-series regressions aggregated on a weekly interval.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label htmlFor="horizon-select" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Horizon:</label>
+              <select
+                id="horizon-select"
+                value={forecastHorizon}
+                onChange={(e) => setForecastHorizon(parseInt(e.target.value, 10))}
+                className="form-input"
+                style={{ width: '100px', height: '32px', padding: '0 8px', fontSize: '0.8rem', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-glass)', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-primary)', marginTop: 0 }}
+              >
+                <option value="2">2 Weeks</option>
+                <option value="4">4 Weeks</option>
+                <option value="8">8 Weeks</option>
+                <option value="12">12 Weeks</option>
+              </select>
+            </div>
+            {forecastStatus === 'FORECASTED' && (
+              <span className="badge badge-info" style={{ textTransform: 'uppercase', padding: '4px 10px', fontSize: '0.7rem', height: 'fit-content' }}>
+                Model: {forecastModel.replace(/_/g, ' ')}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {forecastStatus === 'LOADING' && (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <RefreshCw size={24} className="spin" style={{ color: 'var(--primary)' }} />
+            <span style={{ fontSize: '0.85rem' }}>Running predictive inferences...</span>
+          </div>
+        )}
+
+        {forecastStatus === 'INSUFFICIENT_HISTORY' && (
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '16px 20px', backgroundColor: 'var(--warning-light)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 'var(--border-radius-md)' }}>
+            <Info size={20} style={{ color: 'var(--warning)', flexShrink: 0 }} />
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+              This product does not have enough historical sales data to generate a reliable forecast (needs at least 4 weeks of sales records).
+            </span>
+          </div>
+        )}
+
+        {forecastStatus === 'ERROR' && (
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '16px 20px', backgroundColor: 'var(--danger-light)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 'var(--border-radius-md)' }}>
+            <AlertCircle size={20} style={{ color: 'var(--danger)', flexShrink: 0 }} />
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+              Failed to connect to the forecasting engine.
+            </span>
+          </div>
+        )}
+
+        {forecastStatus === 'FORECASTED' && (() => {
+          // Process chart dimensions
+          const hist = historyData.slice(-8); // display last 8 weeks
+          const fore = forecastData;
+          const combined = [
+            ...hist.map(d => ({ ...d, type: 'history' })),
+            ...fore.map(d => ({ ...d, type: 'forecast' }))
+          ];
+          
+          if (combined.length === 0) return null;
+
+          const width = 600;
+          const height = 220;
+          const paddingLeft = 45;
+          const paddingRight = 20;
+          const paddingTop = 15;
+          const paddingBottom = 35;
+
+          const maxVal = Math.max(...combined.map(d => d.quantity), 10);
+          
+          // Map index to X coordinate
+          const getX = (idx) => {
+            const chartWidth = width - paddingLeft - paddingRight;
+            return paddingLeft + (idx / (combined.length - 1)) * chartWidth;
+          };
+
+          // Map quantity to Y coordinate
+          const getY = (val) => {
+            const chartHeight = height - paddingTop - paddingBottom;
+            return height - paddingBottom - (val / maxVal) * chartHeight;
+          };
+
+          // Generate paths
+          let historyPoints = [];
+          let forecastPoints = [];
+
+          combined.forEach((pt, idx) => {
+            const x = getX(idx);
+            const y = getY(pt.quantity);
+            if (pt.type === 'history') {
+              historyPoints.push({ x, y, val: pt.quantity, date: pt.date });
+            } else {
+              // Connect last history point to first forecast point
+              if (idx === hist.length) {
+                const prev = combined[idx - 1];
+                forecastPoints.push({ x: getX(idx - 1), y: getY(prev.quantity), val: prev.quantity, date: prev.date });
+              }
+              forecastPoints.push({ x, y, val: pt.quantity, date: pt.date });
+            }
+          });
+
+          const createPath = (pts) => {
+            if (pts.length === 0) return '';
+            return `M ${pts[0].x} ${pts[0].y} ` + pts.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
+          };
+
+          const todayIdx = hist.length - 1;
+          const todayX = getX(todayIdx);
+
+          return (
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px' }}>
+              {/* SVG Render */}
+              <div style={{ backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: 'var(--border-radius-md)', padding: '16px' }}>
+                <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: 'auto', display: 'block' }}>
+                  {/* Grid Lines */}
+                  {[0, 0.25, 0.5, 0.75, 1.0].map((ratio) => {
+                    const y = getY(maxVal * ratio);
+                    return (
+                      <g key={ratio} style={{ opacity: 0.15 }}>
+                        <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} stroke="var(--text-secondary)" strokeWidth="1" />
+                        <text x={paddingLeft - 8} y={y + 4} textAnchor="end" fontSize="9" fill="var(--text-primary)" fontWeight="500">
+                          {Math.round(maxVal * ratio)}
+                        </text>
+                      </g>
+                    );
+                  })}
+
+                  {/* Dividers */}
+                  <line x1={todayX} y1={paddingTop} x2={todayX} y2={height - paddingBottom} stroke="var(--primary)" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.6" />
+                  <text x={todayX} y={paddingTop - 4} textAnchor="middle" fontSize="9" fill="var(--primary)" fontWeight="600" opacity="0.8">TODAY</text>
+
+                  {/* Lines */}
+                  {historyPoints.length > 0 && (
+                    <path d={createPath(historyPoints)} fill="none" stroke="var(--accent-cyan)" strokeWidth="2.5" />
+                  )}
+                  {forecastPoints.length > 0 && (
+                    <path d={createPath(forecastPoints)} fill="none" stroke="var(--success)" strokeWidth="2.5" strokeDasharray="4 4" />
+                  )}
+
+                  {/* Points */}
+                  {historyPoints.map((pt, idx) => (
+                    <circle key={`h-${idx}`} cx={pt.x} cy={pt.y} r="4" fill="#0b0f19" stroke="var(--accent-cyan)" strokeWidth="2" />
+                  ))}
+                  {forecastPoints.slice(1).map((pt, idx) => (
+                    <circle key={`f-${idx}`} cx={pt.x} cy={pt.y} r="4" fill="#0b0f19" stroke="var(--success)" strokeWidth="2" />
+                  ))}
+
+                  {/* Axis labels */}
+                  {combined.map((pt, idx) => {
+                    // Show labels selectively to avoid overlap
+                    if (idx % 2 === 0 || idx === todayIdx || idx === combined.length - 1) {
+                      const dateObj = new Date(pt.date);
+                      const displayDate = `${dateObj.getUTCMonth() + 1}/${dateObj.getUTCDate()}`;
+                      return (
+                        <text key={idx} x={getX(idx)} y={height - paddingBottom + 16} textAnchor="middle" fontSize="9" fill="var(--text-secondary)" fontWeight="500">
+                          {displayDate}
+                        </text>
+                      );
+                    }
+                    return null;
+                  })}
+                </svg>
+
+                {/* Legend indicator */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '12px', fontSize: '0.8rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ width: '12px', height: '3px', backgroundColor: 'var(--accent-cyan)' }} />
+                    <span style={{ color: 'var(--text-secondary)' }}>Historical Demand</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ width: '12px', height: '3px', borderTop: '2px dashed var(--success)' }} />
+                    <span style={{ color: 'var(--text-secondary)' }}>Forecast Predictions</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Data Table */}
+              <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div style={{ backgroundColor: 'rgba(255,255,255,0.01)', border: '1px solid var(--border-glass)', borderRadius: 'var(--border-radius-md)', padding: '16px', flex: 1, overflowY: 'auto', maxHeight: '180px' }}>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: 600, borderBottom: '1px solid var(--border-glass)', paddingBottom: '6px', marginBottom: '10px' }}>
+                    Forecast Quantities (Weekly)
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem' }}>
+                    {fore.map((d, index) => {
+                      const dateObj = new Date(d.date);
+                      const dateString = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                      return (
+                        <div key={index} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '4px' }}>
+                          <span style={{ color: 'var(--text-secondary)' }}>Week starting {dateString}</span>
+                          <span style={{ fontWeight: 600, color: 'var(--success)' }}>{d.quantity} units</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: '4px', alignItems: 'center', marginTop: '12px' }}>
+                  <Info size={14} style={{ flexShrink: 0 }} />
+                  <span>Forecast generated at {new Date().toLocaleTimeString()}. Evaluates historic sales frequency patterns.</span>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Confirmation Dialog Overlay Modal (ACCESSIBLE) */}

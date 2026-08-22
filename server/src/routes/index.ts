@@ -7,6 +7,7 @@ import inventoryRouter from './inventory';
 import challanRouter from './challan';
 import dashboardRouter from './dashboard';
 import importRouter from './import';
+import forecastRouter from './forecast';
 
 const router = Router();
 
@@ -33,5 +34,8 @@ router.use('/dashboard', dashboardRouter);
 
 // Intelligent Ingestion Import endpoints
 router.use('/import', importRouter);
+
+// Demand Forecasting endpoints
+router.use('/forecast', forecastRouter);
 
 export default router;
