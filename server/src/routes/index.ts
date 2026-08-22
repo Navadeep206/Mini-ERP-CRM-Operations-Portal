@@ -6,6 +6,7 @@ import productRouter from './product';
 import inventoryRouter from './inventory';
 import challanRouter from './challan';
 import dashboardRouter from './dashboard';
+import importRouter from './import';
 
 const router = Router();
 
@@ -29,5 +30,8 @@ router.use('/challans', challanRouter);
 
 // Dashboard Aggregation endpoints
 router.use('/dashboard', dashboardRouter);
+
+// Intelligent Ingestion Import endpoints
+router.use('/import', importRouter);
 
 export default router;

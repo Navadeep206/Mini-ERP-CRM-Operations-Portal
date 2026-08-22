@@ -27,6 +27,7 @@ import ChallanForm from './pages/ChallanForm';
 import ChallanDetail from './pages/ChallanDetail';
 import Forbidden from './pages/Forbidden';
 import NotFound from './pages/NotFound';
+import ImportPortal from './pages/ImportPortal';
 
 export default function App() {
   return (
@@ -131,6 +132,16 @@ export default function App() {
                     element={
                       <RequireRole allowedRoles={['ADMIN', 'WAREHOUSE', 'ACCOUNTS']}>
                         <Inventory />
+                      </RequireRole>
+                    } 
+                  />
+
+                  {/* AI Bulk Import Ingestion - ADMIN, WAREHOUSE */}
+                  <Route 
+                    path="/import" 
+                    element={
+                      <RequireRole allowedRoles={['ADMIN', 'WAREHOUSE']}>
+                        <ImportPortal />
                       </RequireRole>
                     } 
                   />

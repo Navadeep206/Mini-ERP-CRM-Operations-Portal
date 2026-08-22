@@ -10,7 +10,8 @@ import {
   LogOut, 
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  UploadCloud
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -35,7 +36,8 @@ export default function AppLayout() {
     { to: '/customers', label: 'Customers CRM', icon: Users, roles: ['ADMIN', 'SALES', 'ACCOUNTS'] },
     { to: '/products', label: 'Product Catalog', icon: Package, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] },
     { to: '/inventory', label: 'Inventory Stocks', icon: ShoppingCart, roles: ['ADMIN', 'WAREHOUSE', 'ACCOUNTS'] },
-    { to: '/challans', label: 'Delivery Challans', icon: FileSpreadsheet, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] }
+    { to: '/challans', label: 'Delivery Challans', icon: FileSpreadsheet, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] },
+    { to: '/import', label: 'AI Bulk Import', icon: UploadCloud, roles: ['ADMIN', 'WAREHOUSE'] }
   ];
 
   // Filter links dynamically based on user role (UX Guard only, backend enforces real security)
@@ -49,6 +51,7 @@ export default function AppLayout() {
     if (path.startsWith('/products')) return 'Product Catalog';
     if (path.startsWith('/inventory')) return 'Inventory Stocks Control';
     if (path.startsWith('/challans')) return 'Sales Delivery Challans';
+    if (path.startsWith('/import')) return 'AI Bulk Import Pipeline';
     return 'Nexus ERP Portal';
   };
 

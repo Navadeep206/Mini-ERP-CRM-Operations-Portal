@@ -53,3 +53,37 @@ export const requestHelper = async (endpoint, method = 'GET', body = null) => {
 
   return result.data;
 };
+
+export const uploadFileHelper = async (endpoint, formData) => {
+  const token = tokenStorage.get();
+  if (!token) {
+    throw new Error('Authentication session token is missing');
+  }
+
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+  };
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      tokenStorage.clear();
+      window.location.href = '/login';
+    }
+    const error = new Error(result.message || 'API request failed');
+    error.status = response.status;
+    if (result.errors) {
+      error.errors = result.errors;
+    }
+    throw error;
+  }
+
+  return result.data;
+};
