@@ -11,7 +11,8 @@ import {
   Menu,
   X,
   ChevronRight,
-  UploadCloud
+  UploadCloud,
+  Bot
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -37,7 +38,8 @@ export default function AppLayout() {
     { to: '/products', label: 'Product Catalog', icon: Package, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] },
     { to: '/inventory', label: 'Inventory Stocks', icon: ShoppingCart, roles: ['ADMIN', 'WAREHOUSE', 'ACCOUNTS'] },
     { to: '/challans', label: 'Delivery Challans', icon: FileSpreadsheet, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] },
-    { to: '/import', label: 'AI Bulk Import', icon: UploadCloud, roles: ['ADMIN', 'WAREHOUSE'] }
+    { to: '/import', label: 'AI Bulk Import', icon: UploadCloud, roles: ['ADMIN', 'WAREHOUSE'] },
+    { to: '/ai-assistant', label: 'AI Assistant', icon: Bot, roles: ['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'] }
   ];
 
   // Filter links dynamically based on user role (UX Guard only, backend enforces real security)
@@ -52,6 +54,7 @@ export default function AppLayout() {
     if (path.startsWith('/inventory')) return 'Inventory Stocks Control';
     if (path.startsWith('/challans')) return 'Sales Delivery Challans';
     if (path.startsWith('/import')) return 'AI Bulk Import Pipeline';
+    if (path.startsWith('/ai-assistant')) return 'AI Assistant';
     return 'Nexus ERP Portal';
   };
 

@@ -8,6 +8,8 @@ import challanRouter from './challan';
 import dashboardRouter from './dashboard';
 import importRouter from './import';
 import forecastRouter from './forecast';
+import intelligenceRouter from './intelligence';
+import aiRouter from './ai';
 
 const router = Router();
 
@@ -26,6 +28,9 @@ router.use('/products', productRouter);
 // Inventory Control endpoints
 router.use('/inventory', inventoryRouter);
 
+// Inventory Intelligence endpoints
+router.use('/inventory/intelligence', intelligenceRouter);
+
 // Sales Challan endpoints
 router.use('/challans', challanRouter);
 
@@ -37,5 +42,8 @@ router.use('/import', importRouter);
 
 // Demand Forecasting endpoints
 router.use('/forecast', forecastRouter);
+
+// AI Assistant endpoints
+router.use('/ai', aiRouter);
 
 export default router;
